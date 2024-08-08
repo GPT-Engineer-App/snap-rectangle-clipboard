@@ -5,31 +5,29 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 
 const ScreenshotTool = () => {
-  const [isSelecting, setIsSelecting] = useState(false);
+  const [isActive, setIsActive] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
   const [startPos, setStartPos] = useState({ x: 0, y: 0 });
   const [endPos, setEndPos] = useState({ x: 0, y: 0 });
   const selectionRef = useRef(null);
-  const timeoutRef = useRef(null);
 
   const startSelection = (e) => {
-    setIsSelecting(true);
+    setIsDrawing(true);
     setStartPos({ x: e.clientX, y: e.clientY });
     setEndPos({ x: e.clientX, y: e.clientY });
-
-    timeoutRef.current = setTimeout(() => {
-      takeScreenshot();
-    }, 500); // Hold for 500ms to take screenshot
   };
 
   const updateSelection = (e) => {
-    if (isSelecting) {
+    if (isDrawing) {
       setEndPos({ x: e.clientX, y: e.clientY });
     }
   };
 
   const endSelection = () => {
-    setIsSelecting(false);
-    clearTimeout(timeoutRef.current);
+    if (isDrawing) {
+      setIsDrawing(false);
+      takeScreenshot();
+    }
   };
 
   const takeScreenshot = useCallback(() => {
@@ -51,10 +49,13 @@ const ScreenshotTool = () => {
         })
         .catch(() => toast.error('Failed to save screenshot'));
     }
-    setIsSelecting(false);
+    setIsActive(false);
   }, []);
 
-  useKey('Escape', () => setIsSelecting(false));
+  useKey('Escape', () => {
+    setIsActive(false);
+    setIsDrawing(false);
+  });
 
   const selectionStyle = {
     position: 'fixed',
@@ -70,8 +71,8 @@ const ScreenshotTool = () => {
 
   return (
     <div>
-      <Button onClick={() => setIsSelecting(true)}>Take Screenshot</Button>
-      {isSelecting && (
+      <Button onClick={() => setIsActive(true)}>Take Screenshot</Button>
+      {isActive && (
         <div
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, cursor: 'crosshair' }}
           onMouseDown={startSelection}
@@ -79,7 +80,7 @@ const ScreenshotTool = () => {
           onMouseUp={endSelection}
           onMouseLeave={endSelection}
         >
-          <div ref={selectionRef} style={selectionStyle} />
+          {isDrawing && <div ref={selectionRef} style={selectionStyle} />}
         </div>
       )}
     </div>
