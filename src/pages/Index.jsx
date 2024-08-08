@@ -12,9 +12,10 @@ const Index = () => {
         <h2 className="text-2xl font-semibold mb-4">How to use:</h2>
         <ol className="list-decimal list-inside space-y-2">
           <li>Click the "Take Screenshot" button</li>
-          <li>Click and drag to select the area you want to capture</li>
-          <li>Release the mouse button to save the screenshot</li>
-          <li>Press ESC to cancel the selection</li>
+          <li>Click and hold to select the area you want to capture</li>
+          <li>Hold for about half a second to automatically take the screenshot</li>
+          <li>Release the mouse button before half a second to cancel</li>
+          <li>Press ESC at any time to cancel the selection</li>
         </ol>
       </div>
     </div>
