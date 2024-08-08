@@ -3,6 +3,7 @@ import { useKey } from 'react-use';
 import { toPng } from 'html-to-image';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Clipboard } from 'lucide-react';
 
 const ScreenshotTool = () => {
   const [isActive, setIsActive] = useState(false);
@@ -41,13 +42,21 @@ const ScreenshotTool = () => {
         },
       })
         .then((dataUrl) => {
-          const link = document.createElement('a');
-          link.download = 'screenshot.png';
-          link.href = dataUrl;
-          link.click();
-          toast.success('Screenshot saved!');
+          // Convert data URL to Blob
+          fetch(dataUrl)
+            .then(res => res.blob())
+            .then(blob => {
+              // Create a new ClipboardItem
+              const item = new ClipboardItem({ "image/png": blob });
+              // Write the ClipboardItem to the clipboard
+              navigator.clipboard.write([item]).then(() => {
+                toast.success('Screenshot copied to clipboard!');
+              }).catch(() => {
+                toast.error('Failed to copy screenshot to clipboard');
+              });
+            });
         })
-        .catch(() => toast.error('Failed to save screenshot'));
+        .catch(() => toast.error('Failed to capture screenshot'));
     }
     setIsActive(false);
   }, []);
@@ -71,7 +80,10 @@ const ScreenshotTool = () => {
 
   return (
     <div>
-      <Button onClick={() => setIsActive(true)}>Take Screenshot</Button>
+      <Button onClick={() => setIsActive(true)}>
+        <Clipboard className="mr-2 h-4 w-4" />
+        Take Screenshot
+      </Button>
       {isActive && (
         <div
           style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, cursor: 'crosshair' }}
